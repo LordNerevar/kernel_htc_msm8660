@@ -646,8 +646,8 @@ static void adreno_iommu_setstate(struct kgsl_device *device,
 					uint32_t flags)
 {
 	unsigned int pt_val, reg_pt_val;
-	unsigned int link[250];
-	unsigned int *cmds = &link[0];
+	unsigned int *link = NULL;
+	unsigned int *cmds = NULL;
 	int sizedwords = 0;
 	struct adreno_device *adreno_dev = ADRENO_DEVICE(device);
 	int num_iommu_units, i;
@@ -673,6 +673,14 @@ static void adreno_iommu_setstate(struct kgsl_device *device,
 	if (kgsl_mmu_enable_clk(&device->mmu,
 				KGSL_IOMMU_CONTEXT_USER))
 		goto done;
+
+	link = kmalloc(sizeof(unsigned int) * 250, GFP_KERNEL);
+	if (!link) {
+		KGSL_DRV_ERR(device, "Temp command buffer alloc error\n");
+		BUG();
+		return;
+	}
+	cmds = link;
 
 	cmds += __adreno_add_idle_indirect_cmds(cmds,
 		device->mmu.setstate_memory.gpuaddr +
@@ -771,7 +779,7 @@ static void adreno_iommu_setstate(struct kgsl_device *device,
 
 	cmds += adreno_add_idle_cmds(adreno_dev, cmds);
 
-	sizedwords += (cmds - &link[0]);
+	sizedwords += (cmds - link);
 	if (sizedwords) {
 		/* invalidate all base pointers */
 		*cmds++ = cp_type3_packet(CP_INVALIDATE_STATE, 1);
@@ -781,17 +789,19 @@ static void adreno_iommu_setstate(struct kgsl_device *device,
 		 * use the global timestamp for iommu clock disablement */
 		adreno_ringbuffer_issuecmds(device, adreno_ctx,
 			KGSL_CMD_FLAGS_PMODE,
-			&link[0], sizedwords);
+			link, sizedwords);
 		kgsl_mmu_disable_clk_on_ts(&device->mmu,
 				adreno_dev->ringbuffer.global_ts, true);
 	}
 
-	if (sizedwords > (sizeof(link)/sizeof(unsigned int))) {
+	if (sizedwords > 250) {
 		KGSL_DRV_ERR(device, "Temp command buffer overflow\n");
 		BUG();
 	}
 done:
 	kgsl_context_put(context);
+	if (link)
+		kfree(link);
 }
 
 static void adreno_gpummu_setstate(struct kgsl_device *device,
@@ -799,8 +809,8 @@ static void adreno_gpummu_setstate(struct kgsl_device *device,
 					uint32_t flags)
 {
 	struct adreno_device *adreno_dev = ADRENO_DEVICE(device);
-	unsigned int link[32];
-	unsigned int *cmds = &link[0];
+	unsigned int *link = NULL;
+	unsigned int *cmds = NULL;
 	int sizedwords = 0;
 	unsigned int mh_mmu_invalidate = 0x00000003; /*invalidate all and tc */
 	struct kgsl_context *context;
@@ -823,6 +833,14 @@ static void adreno_gpummu_setstate(struct kgsl_device *device,
 		if (context == NULL)
 			return;
 		adreno_ctx = context->devctxt;
+
+		link = kmalloc(sizeof(unsigned int) * 32, GFP_KERNEL);
+		if (!link) {
+			KGSL_DRV_ERR(device, "Temp command buffer alloc error\n");
+			BUG();
+			return;
+		}
+		cmds = link;
 
 		if (flags & KGSL_MMUFLAGS_PTUPDATE) {
 			/* wait for graphics pipe to be idle */
@@ -898,9 +916,10 @@ static void adreno_gpummu_setstate(struct kgsl_device *device,
 
 		adreno_ringbuffer_issuecmds(device, adreno_ctx,
 					KGSL_CMD_FLAGS_PMODE,
-					&link[0], sizedwords);
+					link, sizedwords);
 
 		kgsl_context_put(context);
+		kfree(link);
 	} else {
 		kgsl_mmu_device_setstate(&device->mmu, flags);
 	}
