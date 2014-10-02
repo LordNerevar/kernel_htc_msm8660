@@ -358,8 +358,6 @@ static int gpio_event_input_request_irqs(struct gpio_input_state *ds)
 				vol_up_irq = irq;
 			else
 				vol_down_irq = irq;
-		} else {
-			enable_irq_wake(irq);
 		}
 #endif
 		if (ds->info->info.no_suspend) {
