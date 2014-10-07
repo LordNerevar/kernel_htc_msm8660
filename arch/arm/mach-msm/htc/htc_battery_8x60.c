@@ -15,19 +15,13 @@
 
 #include <linux/init.h>
 #include <linux/module.h>
-#include <linux/kernel.h>
-#include <linux/err.h>
 #include <linux/platform_device.h>
-#include <linux/debugfs.h>
 #include <linux/wakelock.h>
 #include <linux/gpio.h>
 #include <mach/board.h>
-#include <asm/mach-types.h>
-#include <mach/board_htc.h>
 #include <mach/htc_battery_core.h>
 #include <mach/htc_battery_8x60.h>
 #include <linux/workqueue.h>
-#include <linux/slab.h>
 #include <linux/mfd/tps65200.h>
 #include <linux/reboot.h>
 #include <linux/miscdevice.h>
@@ -35,9 +29,6 @@
 #include <linux/mfd/pmic8058.h>
 #include <mach/mpp.h>
 #include <linux/android_alarm.h>
-#include <linux/suspend.h>
-#include <linux/earlysuspend.h>
-#include <mach/rpm.h>
 
 #ifdef CONFIG_FORCE_FAST_CHARGE
 #include <linux/fastchg.h>
@@ -60,9 +51,7 @@ static DECLARE_DELAYED_WORK(mbat_in_struct, mbat_in_func);
 static struct kset *htc_batt_kset;
 
 #ifdef CONFIG_HTC_BATT_ALARM
-struct early_suspend early_suspend;
 static int screen_state;
-
 static int ac_suspend_flag;
 #endif
 static int htc_batt_mhl_dongle;
@@ -461,22 +450,13 @@ static int htc_battery_get_rt_attr(enum htc_batt_rt_attr attr, int *val)
 static ssize_t htc_battery_show_batt_attr(struct device_attribute *attr,
 					char *buf)
 {
-	int len = 0;
-
-	len += scnprintf(buf + len, PAGE_SIZE - len,
-			"%s", htc_batt_info.debug_log);
-	return len;
+	return scnprintf(buf, PAGE_SIZE, "%s", htc_batt_info.debug_log);
 }
 
 static ssize_t htc_battery_show_cc_attr(struct device_attribute *attr,
 					char *buf)
 {
-	int len = 0;
-
-		len += scnprintf(buf + len, PAGE_SIZE - len,
-			"level:%d\n", htc_batt_info.rep.level*10);
-
-	return len;
+	return scnprintf(buf, PAGE_SIZE, "level:%d\n", htc_batt_info.rep.level*10);
 }
 
 
@@ -723,8 +703,6 @@ static long htc_batt_ioctl(struct file *filp,
 		{
 			htc_battery_set_charging(charger_mode);
 		}
-
-		htc_battery_core_update_changed();
 		break;
 	}
 	case HTC_BATT_IOCTL_UPDATE_BATT_INFO_COMPAT: {
@@ -916,23 +894,6 @@ int htc_batt_turn_off_mhl_dongle_5v(void)
 
 	return ret;
 }
-#ifdef CONFIG_HTC_BATT_ALARM
-#ifdef CONFIG_HAS_EARLYSUSPEND
-static void htc_battery_early_suspend(struct early_suspend *h)
-{
-	BATT_LOG("%s", __func__);
-	screen_state = 0;
-	batt_set_voltage_alarm_mode(BATT_ALARM_DISABLE_MODE);
-}
-
-static void htc_battery_late_resume(struct early_suspend *h)
-{
-	BATT_LOG("%s", __func__);
-	screen_state = 1;
-	batt_set_voltage_alarm_mode(BATT_ALARM_CRITICAL_MODE);
-}
-#endif
-#endif
 
 #define CHECH_TIME_TOLERANCE_MS	(1000)
 static int htc_battery_prepare(struct device *dev)
@@ -1068,18 +1029,32 @@ static void htc_battery_complete(struct device *dev)
 	return;
 }
 
+#if defined(CONFIG_PM) && defined(CONFIG_HTC_BATT_ALARM)
+static int htc_battery_runtime_suspend(struct device *dev)
+{
+	BATT_LOG("%s", __func__);
+	screen_state = 0;
+	batt_set_voltage_alarm_mode(BATT_ALARM_DISABLE_MODE);
+	return 0;
+}
+
+static int htc_battery_runtime_resume(struct device *dev)
+{
+	BATT_LOG("%s", __func__);
+	screen_state = 1;
+	batt_set_voltage_alarm_mode(BATT_ALARM_CRITICAL_MODE);
+	return 0;
+}
+#endif
+
 static struct dev_pm_ops htc_battery_8x60_pm_ops = {
 	.prepare = htc_battery_prepare,
 	.complete = htc_battery_complete,
-};
-
-#if 1
-#define set_irq_type(irq, type) irq_set_irq_type(irq, type)
-#define set_irq_wake(irq, on) irq_set_irq_wake(irq, on)
-#else
-#define set_irq_type(irq, type) set_irq_type(irq, type)
-#define set_irq_wake(irq, on) set_irq_wake(irq, on)
+#if defined(CONFIG_PM) && defined(CONFIG_HTC_BATT_ALARM)
+	.runtime_suspend  = htc_battery_runtime_suspend,
+	.runtime_resume   = htc_battery_runtime_resume,
 #endif
+};
 
 static int htc_battery_probe(struct platform_device *pdev)
 {
@@ -1109,7 +1084,7 @@ static int htc_battery_probe(struct platform_device *pdev)
 	if (rc)
 		BATT_ERR("request mbat_in irq failed!");
 	else
-		set_irq_wake(pdata->gpio_mbat_in, 1);
+		irq_set_irq_wake(pdata->gpio_mbat_in, 1);
 
 	htc_battery_core_ptr->func_get_batt_rt_attr = htc_battery_get_rt_attr;
 	htc_battery_core_ptr->func_show_batt_attr = htc_battery_show_batt_attr;
@@ -1199,15 +1174,6 @@ static int htc_battery_probe(struct platform_device *pdev)
 		BATT_ERR("Get first battery ADC value failed!");
 		goto fail;
 	}
-
-#ifdef CONFIG_HTC_BATT_ALARM
-#ifdef CONFIG_HAS_EARLYSUSPEND
-	early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 2;
-	early_suspend.suspend = htc_battery_early_suspend;
-	early_suspend.resume = htc_battery_late_resume;
-	register_early_suspend(&early_suspend);
-#endif
-#endif
 
 	BATT_LOG("htc_battery_probe(): finish");
 
