@@ -15,19 +15,13 @@
 
 #include <linux/init.h>
 #include <linux/module.h>
-#include <linux/kernel.h>
-#include <linux/err.h>
 #include <linux/platform_device.h>
-#include <linux/debugfs.h>
 #include <linux/wakelock.h>
 #include <linux/gpio.h>
 #include <mach/board.h>
-#include <asm/mach-types.h>
-#include <mach/board_htc.h>
 #include <mach/htc_battery_core.h>
 #include <mach/htc_battery_8x60.h>
 #include <linux/workqueue.h>
-#include <linux/slab.h>
 #include <linux/mfd/tps65200.h>
 #include <linux/reboot.h>
 #include <linux/miscdevice.h>
@@ -35,9 +29,7 @@
 #include <linux/mfd/pmic8058.h>
 #include <mach/mpp.h>
 #include <linux/android_alarm.h>
-#include <linux/suspend.h>
 #include <linux/earlysuspend.h>
-#include <mach/rpm.h>
 
 #ifdef CONFIG_FORCE_FAST_CHARGE
 #include <linux/fastchg.h>
@@ -723,8 +715,6 @@ static long htc_batt_ioctl(struct file *filp,
 		{
 			htc_battery_set_charging(charger_mode);
 		}
-
-		htc_battery_core_update_changed();
 		break;
 	}
 	case HTC_BATT_IOCTL_UPDATE_BATT_INFO_COMPAT: {
