@@ -143,7 +143,7 @@ DECLARE_WAIT_QUEUE_HEAD(dhd_dpc_wait);
 #if defined(OOB_INTR_ONLY)
 extern void dhd_enable_oob_intr(struct dhd_bus *bus, bool enable);
 #endif 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27)) && (1)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27))
 static void dhd_hang_process(struct work_struct *work);
 #endif 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 0))
@@ -312,7 +312,7 @@ typedef struct dhd_info {
 	struct wake_lock wl_wdwake; /* Wifi wd wakelock */
 #endif
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)) && 1
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25))
 	/* net_device interface lock, prevent race conditions among net_dev interface
 	 * calls and wifi_on or wifi_off
 	 */
@@ -3039,7 +3039,7 @@ dhd_osl_detach(osl_t *osh)
 		DHD_ERROR(("%s: MEMORY LEAK %d bytes\n", __FUNCTION__, MALLOCED(osh)));
 	}
 	osl_detach(osh);
-#if 1 && (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27))
 	dhd_registration_check = FALSE;
 	up(&dhd_registration_sem);
 #if	defined(BCMLXSDMMC)
@@ -3274,7 +3274,7 @@ dhd_attach(osl_t *osh, struct dhd_bus *bus, uint bus_hdrlen)
 	wake_lock_init(&dhd->wl_ctrlwake, WAKE_LOCK_SUSPEND, "wlan_ctrl_wake");
 	wake_lock_init(&dhd->wl_wdwake, WAKE_LOCK_SUSPEND, "wlan_wd_wake");
 #endif /* CONFIG_HAS_WAKELOCK */
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)) && 1
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25))
 	mutex_init(&dhd->dhd_net_if_mutex);
 	mutex_init(&dhd->dhd_suspend_mutex);
 #endif
@@ -3360,7 +3360,7 @@ dhd_attach(osl_t *osh, struct dhd_bus *bus, uint bus_hdrlen)
 	}
 	dhd_state |= DHD_ATTACH_STATE_THREADS_CREATED;
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27)) && (1)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27))
 	INIT_WORK(&dhd->work_hang, dhd_hang_process);
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27))  */
 
@@ -4545,7 +4545,7 @@ dhd_net_attach(dhd_pub_t *dhdp, int ifidx)
 		wl_iw_iscan_set_scan_broadcast_prep(net, 1);
 #endif
 
-#if 1 && (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27))
 	if (ifidx == 0) {
 		dhd_registration_check = TRUE;
 		up(&dhd_registration_sem);
@@ -4808,7 +4808,7 @@ dhd_module_init(void)
 {
 	int error = 0;
 
-#if 1 && defined(BCMLXSDMMC) && (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27))
+#if defined(BCMLXSDMMC) && (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27))
 	int retry = POWERUP_MAX_RETRY;
 	int chip_up = 0;
 #endif 
@@ -4835,7 +4835,7 @@ dhd_module_init(void)
 	if (error)
 		goto fail_0;
 
-#if 1 && defined(BCMLXSDMMC) && (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27))
+#if defined(BCMLXSDMMC) && (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27))
 	do {
 		sema_init(&dhd_chipup_sem, 0);
 		dhd_bus_reg_sdio_notify(&dhd_chipup_sem);
@@ -4886,7 +4886,7 @@ dhd_module_init(void)
 	}
 #endif /* defined(CONFIG_WIFI_CONTROL_FUNC) */
 
-#if 1 && (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27))
 	sema_init(&dhd_registration_sem, 0);
 #endif 
 
@@ -4920,7 +4920,7 @@ dhd_module_init(void)
 
 	return error;
 
-#if 1 && (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27)) && defined(BCMLXSDMMC)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27)) && defined(BCMLXSDMMC)
 fail_2:
 	dhd_bus_unregister();
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27)) */
@@ -5332,7 +5332,7 @@ dhd_sendup_event(dhd_pub_t *dhdp, wl_event_msg_t *event, void *data)
 
 void dhd_wait_for_event(dhd_pub_t *dhd, bool *lockvar)
 {
-#if 1 && (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 0))
 	struct dhd_info *dhdinfo =  dhd->info;
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27))
@@ -5350,7 +5350,7 @@ void dhd_wait_for_event(dhd_pub_t *dhd, bool *lockvar)
 
 void dhd_wait_event_wakeup(dhd_pub_t *dhd)
 {
-#if 1 && (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 0))
 	struct dhd_info *dhdinfo =  dhd->info;
 	if (waitqueue_active(&dhdinfo->ctrl_wait))
 		wake_up(&dhdinfo->ctrl_wait);
@@ -5579,7 +5579,7 @@ dhd_dev_pno_get_for_batch(struct net_device *dev, char *buf, int bufsize)
 }
 #endif /* PNO_SUPPORT */
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27)) && (1)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27))
 static void dhd_hang_process(struct work_struct *work)
 {
 	dhd_info_t *dhd;
@@ -5672,7 +5672,7 @@ void dhd_net_if_unlock(struct net_device *dev)
 
 static void dhd_net_if_lock_local(dhd_info_t *dhd)
 {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)) && 1
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25))
 	if (dhd)
 		mutex_lock(&dhd->dhd_net_if_mutex);
 #endif
@@ -5680,7 +5680,7 @@ static void dhd_net_if_lock_local(dhd_info_t *dhd)
 
 static void dhd_net_if_unlock_local(dhd_info_t *dhd)
 {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)) && 1
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25))
 	if (dhd)
 		mutex_unlock(&dhd->dhd_net_if_mutex);
 #endif
@@ -5688,7 +5688,7 @@ static void dhd_net_if_unlock_local(dhd_info_t *dhd)
 
 static void dhd_suspend_lock(dhd_pub_t *pub)
 {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)) && 1
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25))
 	dhd_info_t *dhd = (dhd_info_t *)(pub->info);
 	if (dhd)
 		mutex_lock(&dhd->dhd_suspend_mutex);
@@ -5697,7 +5697,7 @@ static void dhd_suspend_lock(dhd_pub_t *pub)
 
 static void dhd_suspend_unlock(dhd_pub_t *pub)
 {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)) && 1
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25))
 	dhd_info_t *dhd = (dhd_info_t *)(pub->info);
 	if (dhd)
 		mutex_unlock(&dhd->dhd_suspend_mutex);
