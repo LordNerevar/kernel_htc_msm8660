@@ -30,6 +30,7 @@
 #include <mach/mpp.h>
 #include <linux/android_alarm.h>
 #include <linux/earlysuspend.h>
+#include <linux/rtc.h>
 #ifdef CONFIG_FORCE_FAST_CHARGE
 #include <linux/fastchg.h>
 #endif
