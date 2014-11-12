@@ -77,6 +77,7 @@ static void send_usb_connect_notify(struct work_struct *w)
 
 	motg->connect_type_ready = 1;
 	USBH_INFO("send connect type %d\n", motg->connect_type);
+
 #ifdef CONFIG_FORCE_FAST_CHARGE
 	if (motg->connect_type == CONNECT_TYPE_USB) {
 		USB_peripheral_detected = USB_ACC_DETECTED; /* Inform forced fast charge that a USB accessory has been attached */
@@ -86,6 +87,7 @@ static void send_usb_connect_notify(struct work_struct *w)
 		USBH_INFO("USB forced fast charge : No USB device currently attached");
 	}
 #endif
+
 	mutex_lock(&notify_sem);
 	list_for_each_entry(notifier, &g_lh_usb_notifier_list, notifier_link) {
 		if (notifier->func != NULL) {
@@ -668,6 +670,8 @@ static int msm_otg_reset(struct usb_phy *phy)
 
 #ifdef CONFIG_FORCE_FAST_CHARGE
 	USB_porttype_detected = NO_USB_DETECTED; /* No USB plugged, clear fast charge detected port value */
+	is_fast_charge_forced = FAST_CHARGE_NOT_FORCED; /* No fast charge can be forced then... */
+	current_charge_mode = CURRENT_CHARGE_MODE_DISCHARGING; /* ... and we are now on battery */
 #endif
 
 	/*
@@ -2242,7 +2246,6 @@ static void msm_chg_detect_work(struct work_struct *w)
 		msm_chg_enable_aca_intr(motg);
 		USBH_INFO("chg_type = %s\n",
 			chg_to_string(motg->chg_type));
-
 #ifdef CONFIG_FORCE_FAST_CHARGE
 		switch (motg->chg_type) {
 		case USB_SDP_CHARGER:		USB_porttype_detected = USB_SDP_DETECTED;
