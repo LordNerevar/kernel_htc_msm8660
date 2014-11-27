@@ -23,7 +23,11 @@
 #include <asm/ioctls.h>
 #include "audio_utils.h"
 
-#define FRAME_SIZE            (1 + ((1536+sizeof(struct meta_out_dsp)) * 5))
+#define MIN_FRAME_SIZE  1536
+#define NUM_FRAMES     5
+#define META_SIZE      (sizeof(struct meta_out_dsp))
+#define FRAME_SIZE     (1 + ((MIN_FRAME_SIZE + META_SIZE) * NUM_FRAMES))
+
 static int audio_in_pause(struct q6audio_in  *audio)
 {
 	int rc;
