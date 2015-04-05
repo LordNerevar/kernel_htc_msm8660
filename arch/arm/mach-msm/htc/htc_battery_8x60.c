@@ -31,6 +31,7 @@
 #include <linux/android_alarm.h>
 #include <linux/earlysuspend.h>
 #include <linux/rtc.h>
+
 #ifdef CONFIG_FORCE_FAST_CHARGE
 #include <linux/fastchg.h>
 #endif
@@ -307,17 +308,13 @@ static void cable_status_notifier_func(enum usb_connect_type online)
 #ifdef CONFIG_FORCE_FAST_CHARGE
 		/* If forced fast charge is enabled "always" or if no USB device detected, go AC */
 		if ((force_fast_charge == FAST_CHARGE_FORCE_AC) ||
-			(force_fast_charge == FAST_CHARGE_FORCE_AC_IF_NO_USB &&
-			USB_peripheral_detected == USB_ACC_NOT_DETECTED)) {
+		    (force_fast_charge == FAST_CHARGE_FORCE_AC_IF_NO_USB &&
+                     USB_peripheral_detected == USB_ACC_NOT_DETECTED        )) {
 			BATT_LOG("cable USB forced to AC");
-			is_fast_charge_forced = FAST_CHARGE_FORCED;
-			current_charge_mode = CURRENT_CHARGE_MODE_AC;
 			htc_batt_info.rep.charging_source = CHARGER_AC;
 			radio_set_cable_status(CHARGER_AC);
 		} else {
 			BATT_LOG("cable USB not forced to AC");
-			is_fast_charge_forced = FAST_CHARGE_NOT_FORCED;
-			current_charge_mode = CURRENT_CHARGE_MODE_USB;
 			htc_batt_info.rep.charging_source = CHARGER_USB;
 			radio_set_cable_status(CHARGER_USB);
 		}
@@ -330,9 +327,6 @@ static void cable_status_notifier_func(enum usb_connect_type online)
 	case CONNECT_TYPE_AC:
 	case CONNECT_TYPE_MHL_AC:
 		BATT_LOG("cable AC");
-#ifdef CONFIG_FORCE_FAST_CHARGE
-			current_charge_mode = CURRENT_CHARGE_MODE_AC;
-#endif
 		htc_batt_info.rep.charging_source = CHARGER_AC;
 		radio_set_cable_status(CHARGER_AC);
 		break;
@@ -343,9 +337,6 @@ static void cable_status_notifier_func(enum usb_connect_type online)
 		break;
 	case CONNECT_TYPE_UNKNOWN:
 		BATT_ERR("unknown cable");
-#ifdef CONFIG_FORCE_FAST_CHARGE
-			current_charge_mode = CURRENT_CHARGE_MODE_USB;
-#endif
 		htc_batt_info.rep.charging_source = CHARGER_USB;
 		break;
 	case CONNECT_TYPE_INTERNAL:
@@ -728,7 +719,7 @@ static long htc_batt_ioctl(struct file *filp,
 		break;
 	}
 	case HTC_BATT_IOCTL_UPDATE_BATT_INFO_COMPAT: {
-		struct battery_info_reply_compat cmp;
+                struct battery_info_reply_compat cmp;
 		mutex_lock(&htc_batt_info.info_lock);
 		if (copy_from_user(&cmp, (void *)arg,
 					sizeof(struct battery_info_reply))) {
@@ -737,23 +728,23 @@ static long htc_batt_ioctl(struct file *filp,
 			mutex_unlock(&htc_batt_info.info_lock);
 			break;
 		}
-		htc_batt_info.rep.batt_vol = cmp.batt_vol;
-		htc_batt_info.rep.batt_id = cmp.batt_id;
-		htc_batt_info.rep.batt_temp = cmp.batt_temp;
-		htc_batt_info.rep.batt_current = cmp.batt_current;
-		htc_batt_info.rep.batt_discharg_current = cmp.batt_discharg_current;
-		htc_batt_info.rep.level = cmp.level;
-		htc_batt_info.rep.charging_source = cmp.charging_source;
-		htc_batt_info.rep.charging_enabled = cmp.charging_enabled;
-		htc_batt_info.rep.full_bat = cmp.full_bat;
-		htc_batt_info.rep.full_level = cmp.full_level;
-		htc_batt_info.rep.over_vchg = cmp.over_vchg;
-		htc_batt_info.rep.temp_fault = cmp.temp_fault;
-		htc_batt_info.rep.batt_state = cmp.batt_state;
+                htc_batt_info.rep.batt_vol = cmp.batt_vol;
+                htc_batt_info.rep.batt_id = cmp.batt_id;
+                htc_batt_info.rep.batt_temp = cmp.batt_temp;
+                htc_batt_info.rep.batt_current = cmp.batt_current;
+                htc_batt_info.rep.batt_discharg_current = cmp.batt_discharg_current;
+                htc_batt_info.rep.level = cmp.level;
+                htc_batt_info.rep.charging_source = cmp.charging_source;
+                htc_batt_info.rep.charging_enabled = cmp.charging_enabled;
+                htc_batt_info.rep.full_bat = cmp.full_bat;
+                htc_batt_info.rep.full_level = cmp.full_level;
+                htc_batt_info.rep.over_vchg = cmp.over_vchg;
+                htc_batt_info.rep.temp_fault = cmp.temp_fault;
+                htc_batt_info.rep.batt_state = cmp.batt_state;
 		mutex_unlock(&htc_batt_info.info_lock);
-		goto normal_info;
-		break;
-		}
+                goto normal_info;
+                break;
+        }
 	case HTC_BATT_IOCTL_UPDATE_BATT_INFO: {
 		mutex_lock(&htc_batt_info.info_lock);
 		if (copy_from_user(&htc_batt_info.rep, (void *)arg,
@@ -764,7 +755,7 @@ static long htc_batt_ioctl(struct file *filp,
 			break;
 		}
 		mutex_unlock(&htc_batt_info.info_lock);
-		normal_info:
+          normal_info:
 
 #ifdef CONFIG_MACH_VILLEC2
 	if(htc_batt_info.rep.batt_id == 3)
