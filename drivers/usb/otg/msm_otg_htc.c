@@ -3307,7 +3307,7 @@ static void ac_detect_expired_work(struct work_struct *w)
 	}
 }
 
-#ifndef CONFIG_CABLE_DETECT_8X60
+#ifndef CONFIG_CABLE_DETECT_8XXX
 static void htc_vbus_notify(int online)
 {
 	cable_detection_vbus_irq_handler();
@@ -4203,7 +4203,7 @@ static int __init msm_otg_probe(struct platform_device *pdev)
 			"not available\n");
 
 	if (motg->pdata->otg_control == OTG_PMIC_CONTROL) {
-#ifdef CONFIG_CABLE_DETECT_8X60
+#ifdef CONFIG_CABLE_DETECT_8XXX
 		pm8921_charger_register_vbus_sn(&msm_otg_set_vbus_state);
 #else
 		pm8921_charger_register_vbus_sn(&htc_vbus_notify);
