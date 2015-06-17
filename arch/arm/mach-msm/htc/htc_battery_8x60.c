@@ -726,8 +726,6 @@ static long htc_batt_ioctl(struct file *filp,
 		{
 			htc_battery_set_charging(charger_mode);
 		}
-
-		htc_battery_core_update_changed();
 		break;
 	}
 	case HTC_BATT_IOCTL_UPDATE_BATT_INFO_COMPAT: {
