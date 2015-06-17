@@ -44,6 +44,8 @@
 
 #include "linux/mfd/pm8xxx/pm8921-charger-htc.h"
 
+extern int msm_otg_get_vbus_state(void);
+
 static int vbus;
 
 static struct switch_dev dock_switch = {
@@ -441,6 +443,8 @@ static void cable_detect_handler(struct work_struct *w)
 		send_usb_host_connect_notify(1);
 		pInfo->accessory_type = DOCK_STATE_USB_HOST;
 		switch_set_state(&dock_switch, DOCK_STATE_USB_HOST);
+		if (!msm_otg_get_vbus_state())
+			send_cable_connect_notify(CONNECT_TYPE_INTERNAL);
 		break;
 	case DOCK_STATE_DMB:
 		CABLE_INFO("DMB inserted\n");
