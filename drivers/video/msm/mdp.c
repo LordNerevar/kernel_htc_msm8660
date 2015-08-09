@@ -371,14 +371,19 @@ static int mdp_hist_lut_write_off(struct mdp_hist_lut_data *data,
 		struct mdp_hist_lut_info *info, uint32_t offset)
 {
 	int i;
-	uint32_t element[MDP_HIST_LUT_SIZE];
+	uint32_t *element = NULL;
 	uint32_t base = mdp_block2base(info->block);
 	uint32_t sel = info->bank_sel;
-
 
 	if (data->len != MDP_HIST_LUT_SIZE) {
 		pr_err("%s: data->len != %d", __func__, MDP_HIST_LUT_SIZE);
 		return -EINVAL;
+	}
+
+	element = kmalloc(sizeof(uint32_t) * MDP_HIST_LUT_SIZE, GFP_KERNEL);
+	if (element == NULL) {
+		pr_err("%s: Error allocating for histogram data", __func__);
+		return -ENOMEM;
 	}
 
 	if (copy_from_user(&element, data->data,
@@ -395,6 +400,8 @@ static int mdp_hist_lut_write_off(struct mdp_hist_lut_data *data,
 	}
 	mdp_pipe_ctrl(MDP_CMD_BLOCK, MDP_BLOCK_POWER_OFF, FALSE);
 	mdp_clk_ctrl(0);
+
+	kfree(element);
 
 	return 0;
 }
