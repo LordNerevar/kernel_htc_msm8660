@@ -45,29 +45,30 @@ enum tick_nohz_mode {
  * @idle_exittime:	Time when the idle state was left
  * @idle_sleeptime:	Sum of the time slept in idle with sched tick stopped
  * @iowait_sleeptime:	Sum of the time slept in idle with sched tick stopped, with IO outstanding
+ * @sleep_length:<----->Duration of the current idle sleep
  * @do_timer_lst:	CPU was the last one doing do_timer before going idle
  */
 struct tick_sched {
 	struct hrtimer			sched_timer;
 	unsigned long			check_clocks;
 	enum tick_nohz_mode		nohz_mode;
-	ktime_t					idle_tick;
-	int						inidle;
-	int						tick_stopped;
+	ktime_t				idle_tick;
+	int				inidle;
+	int				tick_stopped;
 	unsigned long			idle_jiffies;
 	unsigned long			idle_calls;
 	unsigned long			idle_sleeps;
-	int						idle_active;
-	ktime_t					idle_entrytime;
-	ktime_t					idle_waketime;
-	ktime_t					idle_exittime;
-	ktime_t					idle_sleeptime;
-	ktime_t					iowait_sleeptime;
-	ktime_t					sleep_length;
+	int				idle_active;
+	ktime_t				idle_entrytime;
+	ktime_t				idle_waketime;
+	ktime_t				idle_exittime;
+	ktime_t				idle_sleeptime;
+	ktime_t				iowait_sleeptime;
+	ktime_t				sleep_length;
 	unsigned long			last_jiffies;
 	unsigned long			next_jiffies;
-	ktime_t					idle_expires;
-	int						do_timer_last;
+	ktime_t				idle_expires;
+	int				do_timer_last;
 };
 
 extern void __init tick_init(void);
