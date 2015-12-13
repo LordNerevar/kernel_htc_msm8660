@@ -371,11 +371,12 @@ KBUILD_CPPFLAGS := -D__KERNEL__
 KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
-		   -Wno-format-security \
+		   -Wno-format-security -Wno-maybe-uninitialized \
 		   -fno-delete-null-pointer-checks \
-		   -march=armv7-a -mtune=cortex-a8 -mfpu=neon \
-		   -ffast-math -fsingle-precision-constant \
-		   -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr
+		   -std=gnu89
+
+# pyramid (Qualcomm Scorpion)
+KBUILD_CFLAGS   += -march=armv7-a -mfpu=neon -mtune=cortex-a8
 
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
@@ -573,12 +574,31 @@ ifdef CONFIG_CC_OPTIMIZE_DEFAULT
 KBUILD_CFLAGS	+= -O2
 endif
 ifdef CONFIG_CC_OPTIMIZE_MORE
-KBUILD_CFLAGS	+= -O3
-KBUILD_CFLAGS	+= $(call cc-option, -fmodulo-sched)
-KBUILD_CFLAGS	+= $(call cc-option, -fmodulo-sched-allow-regmoves)
-KBUILD_CFLAGS	+= $(call cc-option, -fno-tree-vectorize)
-# Most of these warnings at -O3 are invalid
-KBUILD_CFLAGS	+= $(call cc-option, -Wno-maybe-uninitialized)
+KBUILD_CFLAGS	+= -O2 \
+			   -ffast-math \
+			   -fgcse-after-reload \
+			   -fgcse-las \
+			   -fgcse-sm \
+			   -fgraphite \
+			   -fgraphite-identity \
+			   -fipa-pta \
+			   -fivopts \
+			   -floop-block \
+			   -floop-interchange \
+			   -floop-nest-optimize \
+			   -floop-parallelize-all \
+			   -floop-strip-mine \
+			   -fpredictive-commoning \
+			   -fsched-spec-load \
+			   -fsection-anchors \
+			   -fsingle-precision-constant \
+			   -ftree-loop-distribute-patterns \
+			   -ftree-loop-im \
+			   -ftree-loop-ivcanon \
+			   -ftree-vectorize \
+			   -funsafe-loop-optimizations \
+			   -fvect-cost-model \
+			   -fweb
 endif
 ifdef CONFIG_CC_OPTIMIZE_FAST
 KBUILD_CFLAGS	+= -Ofast
