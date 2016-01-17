@@ -174,4 +174,12 @@ config INITRAMFS_COMPRESSION_LZO
 	  size is about 10% bigger than gzip; however its speed
 	  (both compression and decompression) is the fastest.
 
+config INITRAMFS_COMPRESSION_LZ4
+	bool "LZ4"
+	depends on RD_LZ4
+	help
+	  Its compression ratio is the poorest among the choices. The kernel
+	  size is about 15% bigger than gzip; however its decompression speed
+	  is the fastest.
+
 endchoice
