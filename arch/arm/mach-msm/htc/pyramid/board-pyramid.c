@@ -105,6 +105,7 @@
 #include <mach/htc_headset_pmic.h>
 #include <mach/htc_headset_8x60.h>
 #include <linux/msm_tsens.h>
+#include <linux/msm_thermal.h>
 
 #ifdef CONFIG_FB_MSM_HDMI_MHL
 #include <mach/mhl.h>
@@ -1308,19 +1309,37 @@ static struct platform_device *early_devices[] __initdata = {
 #endif
 };
 
-#ifdef CONFIG_THERMAL_TSENS8X60
 static struct tsens_platform_data msm_tsens_pdata  = {
-		.slope 			= {702, 702, 702, 702, 702},
-		.tsens_factor		= 1000,
-		.hw_type		= MSM_8660,
-		.tsens_num_sensor	= 6,
+	.slope 			= {702, 702, 702, 702, 702, 702},
+	.tsens_factor		= 1000,
+	.hw_type		= MSM_8660,
+	.patherm0		= -1,
+	.patherm1		= -1,
+	.tsens_num_sensor	= 6,
 };
-#else
+
 static struct platform_device msm_tsens_device = {
-	.name   = "tsens-tm",
+	.name   = "tsens8x60-tm",
 	.id = -1,
 };
-#endif
+
+static struct msm_thermal_data msm_thermal_pdata = {
+	.sensor_id = 0,
+	.poll_ms = 150,
+	.shutdown_temp = 80,
+
+	.allowed_max_high = 76,
+	.allowed_max_low = 71,
+	.allowed_max_freq = 384000,
+
+	.allowed_mid_high = 72,
+	.allowed_mid_low = 67,
+	.allowed_mid_freq = 810000,
+
+	.allowed_low_high = 70,
+	.allowed_low_low = 64,
+	.allowed_low_freq = 1350000,
+};
 
 /* HTC_HEADSET_GPIO Driver */
 static struct htc_headset_gpio_platform_data htc_headset_gpio_data = {
@@ -1794,9 +1813,7 @@ static struct platform_device *pyramid_devices[] __initdata = {
 #ifdef CONFIG_LEDS_PM8058
 	&pm8058_leds,
 #endif
-#ifndef CONFIG_THERMAL_TSENS8X60
 	&msm_tsens_device,
-#endif
         &cable_detect_device,
 	&msm8660_rpm_device,
 #ifdef CONFIG_ION_MSM
@@ -2332,7 +2349,7 @@ static void __init pyramid_init(void)
 #ifdef CONFIG_THERMAL_TSENS8X60
 	msm_tsens_early_init(&msm_tsens_pdata);
 #endif
-
+	msm_thermal_init(&msm_thermal_pdata);
 	BUG_ON(msm_rpm_init(&msm8660_rpm_data));
 	BUG_ON(msm_rpmrs_levels_init(&msm_rpmrs_data));
 

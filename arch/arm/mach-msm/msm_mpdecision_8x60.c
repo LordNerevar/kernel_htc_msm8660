@@ -456,7 +456,7 @@ static void mpdec_input_callback(struct work_struct *unused) {
 }
 
 #ifdef CONFIG_BRICKED_THERMAL
-extern int bricked_thermal_throttled;
+extern int thermal_throttled;
 #endif
 
 static void mpdec_input_event(struct input_handle *handle, unsigned int type,
@@ -464,7 +464,7 @@ static void mpdec_input_event(struct input_handle *handle, unsigned int type,
 	int i = 0;
 
 #ifdef CONFIG_BRICKED_THERMAL
-	if (bricked_thermal_throttled > 0)
+	if (thermal_throttled > 0)
 		return;
 #endif
 
