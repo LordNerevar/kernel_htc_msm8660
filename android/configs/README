@@ -1,0 +1,15 @@
+The kernel configuration files in this directory are meant to be used
+as a base for an Android kernel configuration. All devices should have
+the options in android-base.cfg enabled. While not mandatory, the
+options in android-recommended.cfg enable advanced Android features.
+
+Assuming you already have a minimalist defconfig for your device, a
+possible way to enable these options for pyramid would be:
+
+** Merge BASE settings **
+ARCH=arm scripts/kconfig/merge_config.sh arch/arm/configs/pyramid_defconfig android/configs/android-base.cfg
+
+** Merge RECOMMENDED settings **
+ARCH=arm scripts/kconfig/merge_config.sh arch/arm/configs/pyramid_defconfig android/configs/android-recommended.cfg
+
+Source: https://source.android.com/devices/tech/config/kernel.html
