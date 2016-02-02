@@ -1168,18 +1168,17 @@ struct lruvec *mem_cgroup_lru_move_lists(struct zone *zone,
  * hierarchy subtree
  */
 bool __mem_cgroup_same_or_subtree(const struct mem_cgroup *root_memcg,
-				struct mem_cgroup *memcg)
+				  struct mem_cgroup *memcg)
 {
-	if (root_memcg != memcg) {
-		return (root_memcg->use_hierarchy &&
-			css_is_ancestor(&memcg->css, &root_memcg->css));
-	}
-
-	return true;
+	if (root_memcg == memcg)
+		return true;
+	if (!root_memcg->use_hierarchy)
+		return false;
+	return css_is_ancestor(&memcg->css, &root_memcg->css);
 }
 
 static bool mem_cgroup_same_or_subtree(const struct mem_cgroup *root_memcg,
-				struct mem_cgroup *memcg)
+				       struct mem_cgroup *memcg)
 {
 	bool ret;
 
