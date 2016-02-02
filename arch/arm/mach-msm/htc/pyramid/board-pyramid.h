@@ -54,7 +54,7 @@
 #define MSM_ION_MM_FW_SIZE   0x200000
 #define MSM_ION_MM_SIZE      0x3D00000
 #define MSM_ION_MFC_SIZE     0x100000
-#define MSM_ION_SF_SIZE      0x2800000
+#define MSM_ION_SF_SIZE      0x2A00000
 #define MSM_ION_AUDIO_SIZE   0x4CF000
 
 #define MSM_ION_HEAP_NUM     6
