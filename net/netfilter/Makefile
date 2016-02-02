@@ -121,7 +121,3 @@ obj-$(CONFIG_IP_SET) += ipset/
 
 # IPVS
 obj-$(CONFIG_IP_VS) += ipvs/
-
-# compiler can't handle floop-parallelize-all on these two files
-CFLAGS_nf_conntrack_core.o += -fno-loop-parallelize-all
-CFLAGS_xt_hashlimit.o += -fno-loop-parallelize-all
