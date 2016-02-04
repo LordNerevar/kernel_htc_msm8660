@@ -1309,6 +1309,7 @@ static struct platform_device *early_devices[] __initdata = {
 #endif
 };
 
+#ifdef CONFIG_THERMAL_TSENS8X60
 static struct tsens_platform_data msm_tsens_pdata  = {
 	.slope 			= {702, 702, 702, 702, 702, 702},
 	.tsens_factor		= 1000,
@@ -1317,6 +1318,7 @@ static struct tsens_platform_data msm_tsens_pdata  = {
 	.patherm1		= -1,
 	.tsens_num_sensor	= 6,
 };
+#endif
 
 static struct platform_device msm_tsens_device = {
 	.name   = "tsens8x60-tm",
