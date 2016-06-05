@@ -7,9 +7,9 @@
  *	Alexey Kuznetsov	<kuznet@ms2.inr.ac.ru>
  *
  *	This program is free software; you can redistribute it and/or
- *      modify it under the terms of the GNU General Public License
- *      as published by the Free Software Foundation; either version
- *      2 of the License, or (at your option) any later version.
+ *	modify it under the terms of the GNU General Public License
+ *	as published by the Free Software Foundation; either version
+ *	2 of the License, or (at your option) any later version.
  */
 
 /*
@@ -22,7 +22,7 @@
  *	Maciej W. Rozycki		:	FDDI support
  *	sekiya@USAGI			:	Don't send too many RS
  *						packets.
- *	yoshfuji@USAGI			:       Fixed interval between DAD
+ *	yoshfuji@USAGI			:	Fixed interval between DAD
  *						packets.
  *	YOSHIFUJI Hideaki @USAGI	:	improved accuracy of
  *						address validation timer.
@@ -3339,12 +3339,12 @@ static int __net_init if6_proc_net_init(struct net *net)
 
 static void __net_exit if6_proc_net_exit(struct net *net)
 {
-       proc_net_remove(net, "if_inet6");
+	proc_net_remove(net, "if_inet6");
 }
 
 static struct pernet_operations if6_proc_net_ops = {
-       .init = if6_proc_net_init,
-       .exit = if6_proc_net_exit,
+	.init = if6_proc_net_init,
+	.exit = if6_proc_net_exit,
 };
 
 int __init if6_proc_init(void)
@@ -4555,7 +4555,7 @@ static struct addrconf_sysctl_table
 			.data		= &ipv6_devconf.accept_ra,
 			.maxlen		= sizeof(int),
 			.mode		= 0644,
-			.proc_handler	= proc_dointvec,
+			.proc_handler	= addrconf_sysctl_mtu,
 		},
 		{
 			.procname	= "accept_redirects",
